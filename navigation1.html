@@ -2,289 +2,335 @@
 <html>
 
 <head>
-    <title>Apparition aléatoire des div avec fichiers audio cliquables</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            /* Pour empêcher le défilement de la page */
-            background-color: #F7F3E9;
-        }
+  <title>Sur la trace des transcripteurs</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      /* Pour empêcher le défilement de la page */
+      background-color: #F7F3E9;
+    }
 
-        .item {
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            display: none;
-            background-image: url(./media/images/iconeR.png), url(./media/images/background.jpg);
-            background-size: 100%, cover;
-            background-position: center, center;
-            background-repeat: no-repeat, no-repeat;
-            cursor: pointer;
-            overflow: hidden;
-            z-index: 1;
-            /* Met l'élément en premier-plan */
-        }
+    .item {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      display: none;
+      background-image: url(./media/images/iconeR.png), url(./media/images/background.jpg);
+      background-size: 100%, cover;
+      background-position: center, center;
+      background-repeat: no-repeat, no-repeat;
+      cursor: pointer;
+      overflow: hidden;
+      z-index: 1;
+      /* Met l'élément en premier-plan */
+    }
 
-        .item::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 30px;
-            height: 30px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+    .item::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
 
-        .item:hover::after {
-            opacity: 1;
-        }
+    .item:hover::after {
+      opacity: 1;
+    }
 
-        .item::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 8px 0 8px 14px;
-            border-color: transparent transparent transparent white;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+    .item::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 8px 0 8px 14px;
+      border-color: transparent transparent transparent white;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
 
-        .item:hover::before {
-            opacity: 1;
-        }
+    .item:hover::before {
+      opacity: 1;
+    }
 
-        .item.playing {
-    background-image: url(./media/images/iconeG.gif);
-    background-size: 200%;
-    ;
+    .item.playing {
+      background-image: url(./media/images/iconeG.gif);
+      background-size: 200%;
+      ;
+    }
+
+    audio {
+      position: absolute;
+      left: -9999px;
+      /* Pour déplacer l'élément audio hors de l'écran */
+      z-index: 2;
+      /* Met l'élément en premier-plan */
+    }
+
+    /* Style pour les contrôles audio */
+    .audio-controls {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 3;
+    }
+
+    /* Styles pour l'icône de lecture */
+    .audio-controls::before {
+      content: url(./media/images/play.png);
+    }
+
+    /* Styles pour l'icône de pause */
+    .audio-controls.playing::before {
+      content: url(./media/images/pause.jpg);
+    }
+
+    .item:hover .audio-controls {
+      opacity: 1;
+    }
+
+    /* Style pour les lignes */
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      /* Met l'élément en arrière-plan */
+    }
+
+    path {
+      fill: none;
+      stroke: rgb(7, 1, 37);
+      stroke-width: 2;
+    }
+
+    .path-animation {
+      stroke-dasharray: 2500;
+      stroke-dashoffset: 2500;
+      animation: draw 3s linear forwards;
+    }
+
+    @keyframes draw {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .watermark {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: rgba(13, 2, 65, 0.801); /* Couleur du texte */
+    font-size: 13px; /* Taille de la police */
+    font-family: Arial, sans-serif; /* Police de caractères */
+    z-index: 4; /* Mettre au-dessus des autres éléments */
 }
 
-        audio {
-            position: absolute;
-            left: -9999px;
-            /* Pour déplacer l'élément audio hors de l'écran */
-            z-index: 2;
-            /* Met l'élément en premier-plan */
-        }
+.watermark img {
+    margin-right: 5px;
+    max-width: 25px;
+    max-height: 30px;
+}
 
-        /* Style pour les contrôles audio */
-        .audio-controls {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 3;
-        }
 
-        /* Styles pour l'icône de lecture */
-        .audio-controls::before {
-            content: url(./media/images/play.png);
-        }
-
-        /* Styles pour l'icône de pause */
-        .audio-controls.playing::before {
-            content: url(./media/images/pause.jpg);
-        }
-
-        .item:hover .audio-controls {
-            opacity: 1;
-        }
-
-        /* Style pour les lignes */
-        svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            /* Met l'élément en arrière-plan */
-        }
-
-        path {
-            fill: none;
-            stroke: rgb(7, 1, 37);
-            stroke-width: 2;
-        }
-
-        .path-animation {
-            stroke-dasharray: 2500;
-            stroke-dashoffset: 2500;
-            animation: draw 3s linear forwards;
-        }
-
-        @keyframes draw {
-            to {
-                stroke-dashoffset: 0;
-            }
-        }
-    </style>
+  </style>
 </head>
 
 <body>
-    <div id="container"></div>
-    <svg id="lines"></svg>
+  <div id="container"></div>
+  <svg id="lines"></svg>
+  <div class="watermark"><span>Le Monstre Sonore - cc by-sa 4.0 2024</span>
+    <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+  </div>
 
-    <script>
-        function getRandomAudio(audioFiles) {
-            return audioFiles.splice(Math.floor(Math.random() * audioFiles.length), 1)[0];
-        }
+  <script>
+    async function getRandomAudio() {
+      const url = 'https://api.github.com/repos/mmellet/MonstreSonore/contents/media/dictees/transcripteurs';
+      const response = await fetch(url);
+      const files = await response.json();
 
-        function createAudioDivs() {
-            var container = document.getElementById("container");
-            var audioFiles = [
-                "./media/dictees/audio1.mp3",
-                "./media/dictees/audio2.mp3",
-                "./media/dictees/audio3.mp3"
-                // Ajouter d'autres chemins de fichiers audio au besoin
-            ];
-            var numDivs = Math.floor(Math.random() * 6) + 5; // Entre 5 et 10 éléments
-            var createdAudioFiles = [];
+      const audioFiles = files.map(file => file.download_url);
 
-            for (var i = 0; i < numDivs; i++) {
-                var audioSrc = getRandomAudio(audioFiles);
-                createdAudioFiles.push(audioSrc);
-                var div = document.createElement("div");
-                div.className = "item";
-                div.style.top = Math.floor(Math.random() * (window.innerHeight - 100)) + "px";
-                div.style.left = Math.floor(Math.random() * (window.innerWidth - 100)) + "px";
-                div.dataset.audioSrc = audioSrc; // Stocke l'emplacement du fichier audio dans l'attribut dataset
+      return audioFiles.splice(Math.floor(Math.random() * audioFiles.length), 1)[0];
+    }
 
-                // Créer les contrôles audio
-                var audio = document.createElement("audio");
-                audio.src = audioSrc;
-                audio.controls = true; // Ajouter les contrôles audio
-                div.appendChild(audio);
 
-                // Ajouter l'événement de clic sur le div pour activer la lecture audio
-                div.addEventListener("click", function () {
-                    var audio = this.querySelector("audio");
-                    if (audio.paused) {
-                        audio.play();
-                    } else {
-                        audio.pause();
-                        audio.currentTime = 0; // Remet l'audio au début pour une nouvelle lecture
-                    }
-                });
+    async function getAudioFiles() {
+      return new Promise((resolve, reject) => {
+        fetch('https://mmellet.github.io/MonstreSonore/media/dictees/transcripteurs/')
+          .then(response => response.text())
+          .then(text => {
+            const parser = new DOMParser();
+            const htmlDocument = parser.parseFromString(text, 'text/html');
+            const links = htmlDocument.querySelectorAll('a');
+            const audioFiles = Array.from(links)
+              .filter(link => link.href.endsWith('.mp3'))
+              .map(link => link.href.replace(window.location.href, ''));
+            resolve(audioFiles);
+          })
+          .catch(error => {
+            console.error('Error loading audio files:', error);
+            reject(error);
+          });
+      });
+    }
 
-                // Ajouter l'événement 'ended' pour réinitialiser l'icône de lecture
-                audio.addEventListener("ended", function () {
-                    div.querySelector(".audio-controls").classList.remove("playing");
-                });
+    async function createAudioDivs() {
+      var container = document.getElementById("container");
+      var numDivs = Math.floor(Math.random() * 6) + 5; // Entre 5 et 10 éléments
+      var createdAudioFiles = [];
 
-                container.appendChild(div);
-            }
+      for (var i = 0; i < numDivs; i++) {
+        var audioSrc = await getRandomAudio();
+        createdAudioFiles.push(audioSrc);
+        var div = document.createElement("div");
+        div.className = "item";
+        div.style.top = Math.floor(Math.random() * (window.innerHeight - 100)) + "px";
+        div.style.left = Math.floor(Math.random() * (window.innerWidth - 100)) + "px";
+        div.dataset.audioSrc = audioSrc; // Stocke l'emplacement du fichier audio dans l'attribut dataset
 
-            return createdAudioFiles;
-        }
+        // Créer les contrôles audio
+        var audio = document.createElement("audio");
+        audio.src = audioSrc;
+        audio.controls = true; // Ajouter les contrôles audio
+        div.appendChild(audio);
 
-        function shuffle() {
-            var items = document.querySelectorAll(".item");
-            var lines = document.getElementById("lines");
-            var delay = 1000; // Délai entre l'apparition des éléments et des lignes
-            var curveDelay = 20000; // Délai avant l'apparition de la courbe entre le premier et le deuxième élément
-
-            // Fonction pour faire apparaître les éléments et les lignes entre eux
-            function animateElements(index) {
-                if (index < items.length) {
-                    var item = items[index];
-
-                    setTimeout(function () {
-                        item.style.display = "block";
-
-                        if (index > 0) {
-                            var prevItem = items[index - 1];
-                            var startX = parseInt(prevItem.style.left) +
-                                50; // 50 est la moitié de la largeur/hauteur de l'élément précédent
-                            var startY = parseInt(prevItem.style.top) + 50;
-                            var endX = parseInt(item.style.left) +
-                                50; // 50 est la moitié de la largeur/hauteur de l'élément actuel
-                            var endY = parseInt(item.style.top) + 50;
-
-                            // Créer le chemin SVG
-                            var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                            var pathData =
-                                `M ${startX},${startY} C ${startX},${startY + 200} ${endX},${endY - 200} ${endX},${endY}`;
-                            path.setAttribute("d", pathData);
-                            lines.appendChild(path);
-                            path.classList.add("path-animation");
-                        }
-
-                        animateElements(index + 1);
-                    }, delay);
-                }
-            }
-
-            animateElements(0); // Démarre l'animation des éléments
-        }
-
-        var createdAudioFiles = createAudioDivs(); // Crée les éléments div avec les fichiers audio aléatoires
-        shuffle(); // Lance l'animation
-
-        // Sélectionne tous les contrôles audio
-        var audioControls = document.querySelectorAll(".audio-controls");
-
-        // Pour chaque contrôle audio
-        audioControls.forEach(function (control) {
-            // Ajoute un écouteur d'événement sur le clic
-            control.addEventListener("click", function () {
-                // Trouve l'audio associé
-                var audio = this.parentElement.querySelector("audio");
-                if (audio.paused) {
-                    // Met à jour la classe pour afficher l'icône de pause
-                    this.classList.add("playing");
-                    // Lance la lecture audio
-                    audio.play();
-                } else {
-                    // Met à jour la classe pour afficher l'icône de lecture
-                    this.classList.remove("playing");
-                    // Met en pause la lecture audio
-                    audio.pause();
-                    // Remet l'audio au début pour une nouvelle lecture
-                    audio.currentTime = 0;
-                }
-            });
+        // Ajouter l'événement de clic sur le div pour activer la lecture audio
+        div.addEventListener("click", function () {
+          var audio = this.querySelector("audio");
+          if (audio.paused) {
+            audio.play();
+          } else {
+            audio.pause();
+            audio.currentTime = 0; // Remet l'audio au début pour une nouvelle lecture
+          }
         });
 
-        // Sélectionnez tous les éléments audio
-var audios = document.querySelectorAll('audio');
+        // Ajouter l'événement 'ended' pour réinitialiser l'icône de lecture
+        audio.addEventListener("ended", function () {
+          div.querySelector(".audio-controls").classList.remove("playing");
+        });
 
-// Pour chaque élément audio
-audios.forEach(function(audio) {
-    // Ajoutez un événement pour détecter le début de la lecture
-    audio.addEventListener('play', function() {
-        // Ajoutez la classe 'playing' à la div parent
-        this.parentElement.classList.add('playing');
-    });
+        container.appendChild(div);
+      }
 
-    // Ajoutez un événement pour détecter la pause de la lecture
-    audio.addEventListener('pause', function() {
-        // Supprimez la classe 'playing' de la div parent
-        this.parentElement.classList.remove('playing');
-    });
-});
+      return createdAudioFiles;
+    }
 
-    </script>
+    function shuffle() {
+      var items = document.querySelectorAll(".item");
+      var lines = document.getElementById("lines");
+      var delay = 1000; // Délai entre l'apparition des éléments et des lignes
+      var curveDelay = 20000; // Délai avant l'apparition de la courbe entre le premier et le deuxième élément
+
+      // Fonction pour faire apparaître les éléments et les lignes entre eux
+      function animateElements(index) {
+        if (index < items.length) {
+          var item = items[index];
+
+          setTimeout(function () {
+            item.style.display = "block";
+
+            if (index > 0) {
+              var prevItem = items[index - 1];
+              var startX = parseInt(prevItem.style.left) +
+                50; // 50 est la moitié de la largeur/hauteur de l'élément précédent
+              var startY = parseInt(prevItem.style.top) + 50;
+              var endX = parseInt(item.style.left) +
+                50; // 50 est la moitié de la largeur/hauteur de l'élément actuel
+              var endY = parseInt(item.style.top) + 50;
+
+              // Créer le chemin SVG
+              var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+              var pathData =
+                `M ${startX},${startY} C ${startX},${startY + 200} ${endX},${endY - 200} ${endX},${endY}`;
+              path.setAttribute("d", pathData);
+              lines.appendChild(path);
+              path.classList.add("path-animation");
+            }
+
+            animateElements(index + 1);
+          }, delay);
+        }
+      }
+
+      animateElements(0); // Démarre l'animation des éléments
+    }
+
+    async function initialize() {
+      var createdAudioFiles = await createAudioDivs(); // Crée les éléments div avec les fichiers audio aléatoires
+      shuffle(); // Lance l'animation
+
+      // Sélectionne tous les contrôles audio
+      var audioControls = document.querySelectorAll(".audio-controls");
+
+      // Pour chaque contrôle audio
+      audioControls.forEach(function (control) {
+        // Ajoute un écouteur d'événement sur le clic
+        control.addEventListener("click", function () {
+          // Trouve l'audio associé
+          var audio = this.parentElement.querySelector("audio");
+          if (audio.paused) {
+            // Met à jour la classe pour afficher l'icône de pause
+            this.classList.add("playing");
+            // Lance la lecture audio
+            audio.play();
+          } else {
+            // Met à jour la classe pour afficher l'icône de lecture
+            this.classList.remove("playing");
+            // Met en pause la lecture audio
+            audio.pause();
+            // Remet l'audio au début pour une nouvelle lecture
+            audio.currentTime = 0;
+          }
+        });
+      });
+
+      // Sélectionnez tous les éléments audio
+      var audios = document.querySelectorAll('audio');
+
+      // Pour chaque élément audio
+      audios.forEach(function (audio) {
+        // Ajoutez un événement pour détecter le début de la lecture
+        audio.addEventListener('play', function () {
+          // Ajoutez la classe 'playing' à la div parent
+          this.parentElement.classList.add('playing');
+        });
+
+        // Ajoutez un événement pour détecter la pause de la lecture
+        audio.addEventListener('pause', function () {
+          // Supprimez la classe 'playing' de la div parent
+          this.parentElement.classList.remove('playing');
+        });
+      });
+    }
+
+    // Appeler la fonction initialize() pour démarrer l'initialisation
+    initialize();
+  </script>
 </body>
 
 </html>
