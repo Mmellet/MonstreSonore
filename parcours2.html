@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+<title>Texte Mot par Mot</title>
+<style>
+  #texte {
+    white-space: pre-line;
+    overflow: hidden;
+    position: absolute;
+    top: 2%;
+    left: 10%;
+    visibility: hidden; /* Masquer le texte initialement */
+    font-family:'Times New Roman', Times, serif;
+    color: rgb(8, 1, 44);
+    font-size: 32px;
+  }
+
+  .button {
+    background-color: rgb(8, 1, 44);
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 50px 50px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition-duration: 0.4s;
+  }
+
+  .button:hover {
+    background-color: white; /* Green */
+    border: 3px solid rgb(8, 1, 44);
+    color: rgb(8, 1, 44);
+  }
+
+  .button.playing {
+    background-color: green;
+  }
+
+  body{
+    color: #F7F3E9;
+  }
+
+  
+  .watermark {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: rgba(13, 2, 65, 0.801); /* Couleur du texte */
+    font-size: 13px; /* Taille de la police */
+    font-family: Arial, sans-serif; /* Police de caractères */
+    z-index: 4; /* Mettre au-dessus des autres éléments */
+}
+
+.watermark img {
+    margin-right: 5px;
+    max-width: 25px;
+    max-height: 30px;
+}
+
+.reload-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+         background-color: rgba(13, 2, 65);   /*  Couleur du bouton */
+            width: 30px;
+            height: 30px;
+            border-radius: 50%; /* Rend le bouton rond */
+            border: none;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Masque le dépassement de l'image */
+        
+        }
+
+</style>
+</head>
+<body>
+    
+<audio id="audio" src=""></audio>
+<div id="texte"></div>
+<button id="boutonToggle" class="button"><i id="icone" class="fas fa-play"></i></button> <!-- Bouton pour démarrer l'audio et l'affichage du texte -->
+<div id="container"></div>
+<svg id="lines"></svg>
+<div class="watermark"><span>Aux sons des <i>essais</i></span><br><span>Le Monstre Sonore - cc by-sa 4.0 2024</span>
+  <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+</div>
+<button class="reload-button">
+    <img src="./media/images/fleche.png" style="width: 100%; height: auto;"/>
+</button>
+<script>
+       document.querySelector('.reload-button').addEventListener('click', function() {
+            location.reload();
+        });
+
+const audioUrl = 'https://api.github.com/repos/mmellet/MonstreSonore/contents/media/dictees/essai';
+const textUrl = 'https://api.github.com/repos/mmellet/MonstreSonore/contents/media/dictees/essai/textes';
+
+const audio = document.getElementById('audio');
+const texteDiv = document.getElementById('texte');
+const boutonToggle = document.getElementById('boutonToggle');
+const icone = document.getElementById('icone');
+let isPlaying = false;
+let timeoutId;
+let currentWordIndex = 0;
+
+async function getRandomFile(url) {
+  const response = await fetch(url);
+  const data = await response.json();
+  const randomIndex = Math.floor(Math.random() * data.length);
+  return data[randomIndex].download_url;
+}
+
+async function afficherTexte(texte) {
+  const mots = texte.split(' '); // Diviser le texte en mots
+  for (let i = currentWordIndex; i < mots.length && isPlaying; i++) {
+    texteDiv.textContent += mots[i] + ' '; // Ajouter un mot à la fois
+    currentWordIndex = i + 1;
+    const delai = getRandomInt(200, 900); // Générer un délai aléatoire entre 200 et 600 millisecondes
+    await new Promise(resolve => {
+      timeoutId = setTimeout(resolve, delai); // Attendre le délai avant d'afficher le prochain mot
+    });
+  }
+}
+
+async function init() {
+  const audioFile = await getRandomFile(audioUrl);
+  audio.src = audioFile;
+
+  const audioFileName = audioFile.split('/').pop(); // Récupérer le nom du fichier audio
+  const textFileName = audioFileName.replace('.mp3', '.txt'); // Construire le nom du fichier texte
+  const textFileUrl = `${textUrl}/${textFileName}`;
+
+  const textContent = await fetch(textFileUrl)
+    .then(response => response.json())
+    .then(data => decodeURIComponent(escape(atob(data.content)))); // Décoder le contenu Base64
+
+  boutonToggle.addEventListener('click', async () => {
+    if (audio.paused) {
+      audio.play();
+      texteDiv.style.visibility = 'visible';
+      icone.classList.remove('fa-play');
+      icone.classList.add('fa-pause');
+      boutonToggle.classList.add('playing');
+      isPlaying = true;
+      await afficherTexte(textContent);
+    } else {
+      audio.pause();
+      icone.classList.remove('fa-pause');
+      icone.classList.add('fa-play');
+      boutonToggle.classList.remove('playing');
+      isPlaying = false;
+      clearTimeout(timeoutId);
+    }
+  });
+}
+
+init();
+
+// Fonction pour obtenir un entier aléatoire entre min (inclus) et max (inclus)
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+</script>
+</body>
+</html>
