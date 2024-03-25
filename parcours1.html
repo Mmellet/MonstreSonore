@@ -13,8 +13,8 @@
     }
 
     .item {
-      width: 100px;
-      height: 100px;
+      width: 150px;
+      height: 150px;
       position: absolute;
       display: none;
       background-image: url(./media/images/iconeR.png), url(./media/images/background.jpg);
@@ -173,7 +173,18 @@
         
         }
 
-            
+        /* Nouveau style pour l'élément tooltip */
+        .tooltip {
+            position: absolute;
+            display: none;
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none; /* Empêche l'élément de capturer les événements de souris */
+        }
+  
 
   </style>
 </head>
@@ -191,6 +202,7 @@
 
 
   <script>
+
        document.querySelector('.reload-button').addEventListener('click', function() {
             location.reload();
         });
@@ -203,6 +215,9 @@
 
       return audioFiles.splice(Math.floor(Math.random() * audioFiles.length), 1)[0];
     }
+
+
+
 
 
     async function getAudioFiles() {
@@ -225,47 +240,81 @@
       });
     }
 
-    async function createAudioDivs() {
-      var container = document.getElementById("container");
-      var numDivs = Math.floor(Math.random() * 6) + 5; // Entre 5 et 10 éléments
-      var createdAudioFiles = [];
+  // Liste des noms d'icônes disponibles
+const icons = [
+  'icone1.png',
+  'icone2.png',
+  'icone3.png',
+  'icone4.png',
+  'icone5.png',
+  'icone6.png',
+  'icone7.png',
+  'icone8.png',
+  'icone9.png',
+  // Ajoutez d'autres noms d'icônes au besoin
+];
 
-      for (var i = 0; i < numDivs; i++) {
-        var audioSrc = await getRandomAudio();
-        createdAudioFiles.push(audioSrc);
-        var div = document.createElement("div");
-        div.className = "item";
-        div.style.top = Math.floor(Math.random() * (window.innerHeight - 100)) + "px";
-        div.style.left = Math.floor(Math.random() * (window.innerWidth - 100)) + "px";
-        div.dataset.audioSrc = audioSrc; // Stocke l'emplacement du fichier audio dans l'attribut dataset
+// Fonction pour obtenir un nom d'icône aléatoire
+function getRandomIcon() {
+  const randomIndex = Math.floor(Math.random() * icons.length);
+  return icons[randomIndex];
+}
 
-        // Créer les contrôles audio
-        var audio = document.createElement("audio");
-        audio.src = audioSrc;
-        audio.controls = true; // Ajouter les contrôles audio
-        div.appendChild(audio);
+// Fonction pour créer les éléments .item avec des icônes aléatoires
+async function createAudioDivs() {
+  var container = document.getElementById("container");
+  var numDivs = Math.floor(Math.random() * 6) + 5; // Entre 5 et 10 éléments
+  var createdAudioFiles = [];
 
-        // Ajouter l'événement de clic sur le div pour activer la lecture audio
-        div.addEventListener("click", function () {
-          var audio = this.querySelector("audio");
-          if (audio.paused) {
-            audio.play();
-          } else {
-            audio.pause();
-            audio.currentTime = 0; // Remet l'audio au début pour une nouvelle lecture
-          }
-        });
+  for (var i = 0; i < numDivs; i++) {
+    var audioSrc = await getRandomAudio();
+    createdAudioFiles.push(audioSrc);
+    var div = document.createElement("div");
+    div.className = "item";
+    div.style.top = Math.floor(Math.random() * (window.innerHeight - 100)) + "px";
+    div.style.left = Math.floor(Math.random() * (window.innerWidth - 100)) + "px";
+    div.dataset.audioSrc = audioSrc; // Stocke l'emplacement du fichier audio dans l'attribut dataset
+    
+    // Définir la taille de l'icône aléatoirement
+    var iconSize = Math.floor(Math.random() * 80) + 100; // Entre 50 et 100 pixels
+    div.style.width = iconSize + "px";
+    div.style.height = iconSize + "px";
 
-        // Ajouter l'événement 'ended' pour réinitialiser l'icône de lecture
-        audio.addEventListener("ended", function () {
-          div.querySelector(".audio-controls").classList.remove("playing");
-        });
+    // Choisir une icône aléatoire et l'appliquer à l'élément
+    var randomIcon = getRandomIcon();
+    div.style.backgroundImage = `url(./media/images/icones/${randomIcon})`;
 
-        container.appendChild(div);
+    // Créer les contrôles audio
+    var audio = document.createElement("audio");
+    audio.src = audioSrc;
+    audio.controls = true; // Ajouter les contrôles audio
+    div.appendChild(audio);
+
+    // Ajouter l'événement de clic sur le div pour activer la lecture audio
+    div.addEventListener("click", function () {
+      var audio = this.querySelector("audio");
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+        audio.currentTime = 0; // Remet l'audio au début pour une nouvelle lecture
       }
+    });
 
-      return createdAudioFiles;
-    }
+    // Ajouter l'événement 'ended' pour réinitialiser l'icône de lecture
+    audio.addEventListener("ended", function () {
+      div.querySelector(".audio-controls").classList.remove("playing");
+    });
+
+    container.appendChild(div);
+  }
+
+  return createdAudioFiles;
+}
+
+// Appeler la fonction createAudioDivs() pour créer les éléments .item avec des icônes aléatoires
+createAudioDivs();
+
 
     function shuffle() {
       var items = document.querySelectorAll(".item");
@@ -357,6 +406,8 @@
 
     // Appeler la fonction initialize() pour démarrer l'initialisation
     initialize();
+
+
   </script>
 </body>
 
