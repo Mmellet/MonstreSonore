@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Les transcripteurs par thèmes</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            background-color: #f0f0f0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: rgba(13, 2, 65, 0.801);
+            margin-top: 0%;
+        }
+
+        .hexagon {
+            width: 80px;
+            height: 80px;
+            background-color: #ff0000;
+            position: absolute;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            background-size: cover;
+            cursor: pointer;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .hexagon::after {
+            content: "";
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            transform: translate(-50%, -50%);
+            width: 1%;
+            height: 1%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hexagon:hover::after {
+            opacity: 1;
+        }
+
+        .hexagon::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 0 8px 14px;
+            border-color: transparent transparent transparent rgba(13, 2, 65);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hexagon:hover::before {
+            opacity: 1;
+        }
+
+        .hexagon.playing {
+            background-image: none;
+            background-color: rgb(7, 1, 37);
+        }
+
+        .selecteur {
+            text-align: center;
+            margin-top: 3%;
+        }
+
+        #contenu {
+            position: relative;
+            height: 100%;
+            margin-left: 10%;
+        }
+
+        .audio-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 3;
+        }
+
+        audio {
+            position: absolute;
+            left: -9999px;
+            z-index: 2;
+        }
+
+        .watermark {
+            position: absolute;
+            left: 1%;
+            bottom: 8%;
+            color: rgba(13, 2, 65, 0.801);
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+            z-index: 4;
+        }
+
+        .watermark img {
+            margin-right: 5px;
+            max-width: 25px;
+            max-height: 30px;
+        }
+
+        p {
+            font-family: Arial, Helvetica, sans-serif;
+            color: rgba(13, 2, 65, 0.801);
+            font-size: 28px;
+        }
+
+        .reload-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(13, 2, 65);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .cadre-central {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 75%;
+            border: 2px solid black;
+            box-sizing: border-box;
+            background-color: rgba(13, 2, 65, 0.116);
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+    <p class="selecteur">
+        <label for="select">Sélectionnez un mot-clef :</label>
+        <select id="select" onchange="afficherContenu()">
+            <option value=""></option>
+        </select>
+    </p>
+    <div id="contenu"></div>
+    <div class="watermark"><span>Les <i>transcripteurs</i> par thèmes</span><br><span>Le Monstre Sonore - cc by-sa 4.0
+            2024</span>
+            
+        <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+    </div>
+    <div style="position: absolute; left: 42%;bottom: 8%;font-size: 15px;">
+    <span>Retrouvez les mots-clefs et leurs définitions au sein du <a href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a></span>
+</div>
+    <button class="reload-button" onclick="location.reload()">
+        <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
+    </button>
+
+    <script>
+        var images = [
+            "./media/images/manuscrit.png"
+        ];
+
+        var audioFiles = {};
+
+        function chargerFichiersAudio() {
+            return fetch('https://mmellet.github.io/MonstreSonore/thematiques.csv')
+                .then(response => response.text())
+                .then(data => {
+                    var lignes = data.split('\n');
+                    var select = document.getElementById("select");
+
+                    lignes.forEach(ligne => {
+                        var elements = ligne.split(',');
+                        var motClef = elements[0];
+
+                        var option = document.createElement("option");
+                        option.value = motClef;
+                        option.textContent = motClef;
+                        select.appendChild(option);
+
+                        var fichiersAudio = elements.slice(1);
+                        fichiersAudio = fichiersAudio.map(audio =>
+                            "https://mmellet.github.io/MonstreSonore/media/dictees/transcripteurs/" +
+                            audio);
+
+                        audioFiles[motClef] = fichiersAudio;
+                    });
+                });
+        }
+
+        window.onload = function() {
+            chargerFichiersAudio().then(() => {
+                var select = document.getElementById("select");
+                select.addEventListener("change", afficherContenu);
+            });
+        };
+
+        function getRandomFragment(imageUrl) {
+            var fragmentWidth = 50;
+            var fragmentHeight = 50;
+            var x = Math.floor(Math.random() * (300 - fragmentWidth));
+            var y = Math.floor(Math.random() * (300 - fragmentHeight));
+            return "url(" + imageUrl + ") " + (-x) + "px " + (-y) + "px";
+        }
+
+        function afficherFormes(fichiersAudio) {
+            var contenu = document.getElementById("contenu");
+            var cadreCentral = document.createElement("div");
+            cadreCentral.className = "cadre-central";
+            contenu.appendChild(cadreCentral);
+
+            var hexagoneSize = 80;
+            var padding = 20;
+
+            var regionCentrale = {
+                top: padding,
+                left: padding,
+                width: cadreCentral.clientWidth - 2 * padding,
+                height: cadreCentral.clientHeight - 2 * padding
+            };
+
+            var positionsUtilisees = [];
+
+            fichiersAudio.forEach(audio => {
+                var positionValide = false;
+                var left, top;
+
+                while (!positionValide) {
+                    left = Math.random() * regionCentrale.width + regionCentrale.left;
+                    top = Math.random() * regionCentrale.height + regionCentrale.top;
+
+                    positionValide = true;
+
+                    for (var i = 0; i < positionsUtilisees.length; i++) {
+                        var positionExistante = positionsUtilisees[i];
+                        if (Math.abs(left - positionExistante.left) < hexagoneSize &&
+                            Math.abs(top - positionExistante.top) < hexagoneSize) {
+                            positionValide = false;
+                            break;
+                        }
+                    }
+
+                    if (left < padding || left + hexagoneSize > regionCentrale.width - padding ||
+                        top < padding || top + hexagoneSize > regionCentrale.height - padding) {
+                        positionValide = false;
+                    }
+                }
+
+                positionsUtilisees.push({
+                    left: left,
+                    top: top
+                });
+
+                var hexagone = document.createElement("div");
+                hexagone.className = "hexagon";
+                hexagone.style.top = top + "px";
+                hexagone.style.left = left + "px";
+                var randomImage = images[Math.floor(Math.random() * images.length)];
+                hexagone.style.background = getRandomFragment(randomImage);
+
+                hexagone.addEventListener("click", function() {
+                    var audioElement = document.getElementById("audio-" + audio);
+                    if (audioElement.paused) {
+                        audioElement.play();
+                        hexagone.classList.add("playing");
+                    } else {
+                        audioElement.pause();
+                        hexagone.classList.remove("playing");
+                    }
+                });
+
+                cadreCentral.appendChild(hexagone);
+
+                var numero = audio.match(/\d+/)[0];
+
+                var numeroElement = document.createElement("span");
+                numeroElement.textContent = numero;
+                numeroElement.style.position = "absolute";
+                numeroElement.style.left = left + hexagoneSize + 20 + "px";
+                numeroElement.style.top = top + hexagoneSize - 10 + "px";
+                cadreCentral.appendChild(numeroElement);
+
+                var audioElement = document.createElement("audio");
+                audioElement.id = "audio-" + audio;
+                audioElement.src = audio;
+                cadreCentral.appendChild(audioElement);
+            });
+        }
+
+        function afficherContenu() {
+            var select = document.getElementById("select");
+            var contenu = document.getElementById("contenu");
+
+            contenu.innerHTML = "";
+
+            if (select.value in audioFiles) {
+                var introduction = document.createElement("p");
+                introduction.textContent = "Parcours d'écoute pour « " + select.value + " »";
+                contenu.appendChild(introduction);
+
+                afficherFormes(audioFiles[select.value]);
+            }
+        }
+
+        window.onload = chargerFichiersAudio;
+    </script>
+</body>
+
+</html>
