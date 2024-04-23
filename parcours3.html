@@ -11,7 +11,7 @@
             position: relative;
             height: 100vh;
             width: 100%;
-            background-color: #f0f0f0;
+            background-color: #F7F3E9;
             font-family: Arial, Helvetica, sans-serif;
             color: rgba(13, 2, 65, 0.801);
             margin-top: 0%;
@@ -73,6 +73,7 @@
         .selecteur {
             text-align: center;
             margin-top: 3%;
+            font-family: 'Times New Roman', Times, serif;
         }
 
         #contenu {
@@ -121,9 +122,10 @@
         }
 
         p {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Times New Roman', Times, serif;
             color: rgba(13, 2, 65, 0.801);
             font-size: 28px;
+            margin-bottom: -1.8px;
         }
 
         .reload-button {
@@ -152,8 +154,49 @@
             height: 75%;
             border: 2px solid black;
             box-sizing: border-box;
-            background-color: rgba(13, 2, 65, 0.116);
+            background-color: #F7F3E9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .mot-clef {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+        }
+
+        .line {
+    position: absolute;
+    background-color: rgba(13, 2, 65, 0.801);
+    animation: drawLine 1s forwards;
+    opacity: 0;
+}
+
+@keyframes drawLine {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: calc(100% - 20px);
+    }
+}
 
 
     </style>
@@ -163,19 +206,21 @@
 <body>
     <p class="selecteur">
         <label for="select">Sélectionnez un mot-clef :</label>
-        <select id="select" onchange="afficherContenu()">
-            <option value=""></option>
+        <select id="select" onchange="afficherContenu()"
+            style="font-family: 'Times New Roman', Times, serif;font-size: 18px;">
+            <option value="" style="font-family: 'Times New Roman', Times, serif;font-size: 36px;"></option>
         </select>
     </p>
     <div id="contenu"></div>
     <div class="watermark"><span>Les <i>transcripteurs</i> par thèmes</span><br><span>Le Monstre Sonore - cc by-sa 4.0
             2024</span>
-            
+
         <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
     </div>
     <div style="position: absolute; left: 42%;bottom: 8%;font-size: 15px;">
-    <span>Retrouvez les mots-clefs et leurs définitions au sein du <a href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a></span>
-</div>
+        <span>Retrouvez les mots-clefs et leurs définitions au sein du <a
+                href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a></span>
+    </div>
     <button class="reload-button" onclick="location.reload()">
         <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
     </button>
@@ -213,7 +258,7 @@
                 });
         }
 
-        window.onload = function() {
+        window.onload = function () {
             chargerFichiersAudio().then(() => {
                 var select = document.getElementById("select");
                 select.addEventListener("change", afficherContenu);
@@ -227,107 +272,149 @@
             var y = Math.floor(Math.random() * (300 - fragmentHeight));
             return "url(" + imageUrl + ") " + (-x) + "px " + (-y) + "px";
         }
-
+        
         function afficherFormes(fichiersAudio) {
-            var contenu = document.getElementById("contenu");
-            var cadreCentral = document.createElement("div");
-            cadreCentral.className = "cadre-central";
-            contenu.appendChild(cadreCentral);
+    var contenu = document.getElementById("contenu");
+    var cadreCentral = document.createElement("div");
+    cadreCentral.className = "cadre-central";
+    contenu.appendChild(cadreCentral);
 
-            var hexagoneSize = 80;
-            var padding = 20;
+    
 
-            var regionCentrale = {
-                top: padding,
-                left: padding,
-                width: cadreCentral.clientWidth - 2 * padding,
-                height: cadreCentral.clientHeight - 2 * padding
-            };
+    var motClefElement = document.createElement("h1");
+    motClefElement.textContent = select.value; // Sélectionner le mot-clé actuel
+    motClefElement.className = "mot-clef"; // Ajouter la classe pour l'animation
+    cadreCentral.appendChild(motClefElement);
 
-            var positionsUtilisees = [];
+    // Forcer le recalcul du style pour que la transition s'applique
+    motClefElement.offsetHeight;
 
-            fichiersAudio.forEach(audio => {
-                var positionValide = false;
-                var left, top;
+    var hexagoneSize = 80;
+    var padding = 20;
+    var minDistance = 40; // Distance minimale entre les hexagones
 
-                while (!positionValide) {
-                    left = Math.random() * regionCentrale.width + regionCentrale.left;
-                    top = Math.random() * regionCentrale.height + regionCentrale.top;
+    var regionCentrale = {
+        top: padding,
+        left: padding,
+        width: cadreCentral.clientWidth - 2 * padding,
+        height: cadreCentral.clientHeight - 2 * padding
+    };
 
-                    positionValide = true;
+    var positionsUtilisees = [];
 
-                    for (var i = 0; i < positionsUtilisees.length; i++) {
-                        var positionExistante = positionsUtilisees[i];
-                        if (Math.abs(left - positionExistante.left) < hexagoneSize &&
-                            Math.abs(top - positionExistante.top) < hexagoneSize) {
-                            positionValide = false;
-                            break;
-                        }
-                    }
+    // Faire apparaître le mot-clef progressivement
+    motClefElement.style.opacity = 0.2;
 
-                    if (left < padding || left + hexagoneSize > regionCentrale.width - padding ||
-                        top < padding || top + hexagoneSize > regionCentrale.height - padding) {
-                        positionValide = false;
-                    }
-                }
+    fichiersAudio.forEach(audio => {
+        var left, top;
+        var positionValide = false;
 
-                positionsUtilisees.push({
-                    left: left,
-                    top: top
-                });
+        while (!positionValide) {
+            left = Math.random() * regionCentrale.width + regionCentrale.left;
+            top = Math.random() * regionCentrale.height + regionCentrale.top;
 
-                var hexagone = document.createElement("div");
-                hexagone.className = "hexagon";
-                hexagone.style.top = top + "px";
-                hexagone.style.left = left + "px";
-                var randomImage = images[Math.floor(Math.random() * images.length)];
-                hexagone.style.background = getRandomFragment(randomImage);
+            // Vérifier que la position n'est pas sur le mot-clef
+            if (Math.abs(left - cadreCentral.clientWidth / 2) < hexagoneSize &&
+                Math.abs(top - cadreCentral.clientHeight / 2) < hexagoneSize) {
+                continue;
+            }
 
-                hexagone.addEventListener("click", function() {
-                    var audioElement = document.getElementById("audio-" + audio);
-                    if (audioElement.paused) {
-                        audioElement.play();
-                        hexagone.classList.add("playing");
-                    } else {
-                        audioElement.pause();
-                        hexagone.classList.remove("playing");
-                    }
-                });
+            positionValide = true;
 
-                cadreCentral.appendChild(hexagone);
+            // Vérifier qu'il n'y a pas de collision avec les positions existantes
+            for (var i = 0; i < positionsUtilisees.length; i++) {
+    var positionExistante = positionsUtilisees[i];
+    var distanceX = Math.abs(left - positionExistante.left);
+    var distanceY = Math.abs(top - positionExistante.top);
+    var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+    if (distance < hexagoneSize + minDistance) {
+        positionValide = false;
+        break;
+    }
+}
 
-                var numero = audio.match(/\d+/)[0];
 
-                var numeroElement = document.createElement("span");
-                numeroElement.textContent = numero;
-                numeroElement.style.position = "absolute";
-                numeroElement.style.left = left + hexagoneSize + 20 + "px";
-                numeroElement.style.top = top + hexagoneSize - 10 + "px";
-                cadreCentral.appendChild(numeroElement);
 
-                var audioElement = document.createElement("audio");
-                audioElement.id = "audio-" + audio;
-                audioElement.src = audio;
-                cadreCentral.appendChild(audioElement);
-            });
-        }
-
-        function afficherContenu() {
-            var select = document.getElementById("select");
-            var contenu = document.getElementById("contenu");
-
-            contenu.innerHTML = "";
-
-            if (select.value in audioFiles) {
-                var introduction = document.createElement("p");
-                introduction.textContent = "Parcours d'écoute pour « " + select.value + " »";
-                contenu.appendChild(introduction);
-
-                afficherFormes(audioFiles[select.value]);
+            if (left < padding || left + hexagoneSize > regionCentrale.width - padding ||
+                top < padding || top + hexagoneSize > regionCentrale.height - padding) {
+                positionValide = false;
             }
         }
 
-        window.onload = chargerFichiersAudio;
+        positionsUtilisees.push({
+            left: left,
+            top: top
+        });
+
+        // Créer et ajouter l'hexagone à la cadre central
+        var hexagone = document.createElement("div");
+        hexagone.className = "hexagon";
+        hexagone.style.top = top + "px";
+        hexagone.style.left = left + "px";
+        var randomImage = images[Math.floor(Math.random() * images.length)];
+        hexagone.style.background = getRandomFragment(randomImage);
+
+        hexagone.addEventListener("click", function () {
+            var audioElement = document.getElementById("audio-" + audio);
+            if (audioElement.paused) {
+                audioElement.play();
+                hexagone.classList.add("playing");
+            } else {
+                audioElement.pause();
+                hexagone.classList.remove("playing");
+            }
+        });
+
+        cadreCentral.appendChild(hexagone);
+
+        // Afficher le numéro du fichier audio à côté de l'hexagone
+        var numero = audio.match(/\d+/)[0];
+        var numeroElement = document.createElement("span");
+        numeroElement.textContent = numero;
+        numeroElement.style.position = "absolute";
+        numeroElement.style.left = left + hexagoneSize + 10 + "px";
+        numeroElement.style.top = top + hexagoneSize - 10 + "px";
+        numeroElement.style.fontSize = "12px";
+        cadreCentral.appendChild(numeroElement);
+
+        // Créer et ajouter l'élément audio correspondant
+        var audioElement = document.createElement("audio");
+        audioElement.id = "audio-" + audio;
+        audioElement.src = audio;
+        cadreCentral.appendChild(audioElement);
+    });
+    var ligne = document.createElement("div");
+ligne.className = "line";
+ligne.style.top = cadreCentral.clientHeight / 2 + "px";
+ligne.style.left = cadreCentral.clientWidth / 2 + "px";
+ligne.style.width = left + hexagoneSize / 2 + "px";
+ligne.style.height = top + hexagoneSize / 2 + "px";
+cadreCentral.appendChild(ligne);
+
+}
+
+function afficherContenu() {
+    var select = document.getElementById("select");
+    var contenu = document.getElementById("contenu");
+
+    contenu.innerHTML = "";
+
+    if (select.value in audioFiles) {
+        var introduction = document.createElement("p");
+        introduction.textContent = "Parcours d'écoute pour « " + select.value + " »";
+        contenu.appendChild(introduction);
+
+        var listeIdentifiants = document.createElement("p");
+        var identifiants = audioFiles[select.value].map(audio => audio.match(/\d+/)[0]).join(", ");
+        listeIdentifiants.textContent = "Identifiants des fichiers audio : " + identifiants;
+        listeIdentifiants.style.fontSize = "18px";
+        contenu.appendChild(listeIdentifiants);
+
+        afficherFormes(audioFiles[select.value]);
+    }
+}
+
+    
     </script>
 </body>
 
