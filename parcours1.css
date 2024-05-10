@@ -1,0 +1,201 @@
+
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        /* Pour empêcher le défilement de la page */
+        background-color: #F7F3E9;
+      }
+  
+      .item {
+        width: 150px;
+        height: 150px;
+        position: absolute;
+        display: none;
+        background-size: 100%, cover;
+        background-position: center, center;
+        background-repeat: no-repeat, no-repeat;
+        cursor: pointer;
+        overflow: hidden;
+        z-index: 1;
+        /* Met l'élément en premier-plan */
+      }
+  
+      .item::after {
+        content: "";
+        position: absolute;
+        top: 10%;
+        left: 10%;
+        transform: translate(-50%, -50%);
+        width: 1%;
+        /* Nouvelle taille du rond */
+        height: 1%;
+        /* Nouvelle taille du rond */
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+  
+  
+      .item:hover::after {
+        opacity: 1;
+      }
+  
+      .item::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 8px 0 8px 14px;
+        border-color: transparent transparent transparent white;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+  
+      .item:hover::before {
+        opacity: 1;
+      }
+  
+      .item.playing {
+        background-image: none;
+        background-color: rgb(7, 1, 37);
+        /* Couleur du point */
+        border-radius: 50%;
+        /* Rend le point rond */
+      }
+  
+  
+      audio {
+        position: absolute;
+        left: -9999px;
+        /* Pour déplacer l'élément audio hors de l'écran */
+        z-index: 2;
+        /* Met l'élément en premier-plan */
+      }
+  
+      /* Style pour les contrôles audio */
+      .audio-controls {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 3;
+      }
+  
+      /* Styles pour l'icône de lecture */
+      .audio-controls::before {
+        content: url(./media/images/play.png);
+      }
+  
+      /* Styles pour l'icône de pause */
+      .audio-controls.playing::before {
+        content: url(./media/images/pause.jpg);
+      }
+  
+      .item:hover .audio-controls {
+        opacity: 1;
+      }
+  
+      /* Style pour les lignes */
+      svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        /* Met l'élément en arrière-plan */
+      }
+  
+      path {
+        fill: none;
+        stroke: rgb(7, 1, 37);
+        stroke-width: 2;
+      }
+  
+      .path-animation {
+        stroke-dasharray: 2500;
+        stroke-dashoffset: 2500;
+        animation: draw 3s linear forwards;
+      }
+  
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+  
+      .watermark {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: rgba(13, 2, 65, 0.801);
+        /* Couleur du texte */
+        font-size: 13px;
+        /* Taille de la police */
+        font-family: Arial, sans-serif;
+        /* Police de caractères */
+        z-index: 4;
+        /* Mettre au-dessus des autres éléments */
+      }
+  
+      .watermark img {
+        margin-right: 5px;
+        max-width: 25px;
+        max-height: 30px;
+      }
+  
+      .reload-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: rgba(13, 2, 65);
+        /*  Couleur du bouton */
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        /* Rend le bouton rond */
+        border: none;
+        outline: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        /* Masque le dépassement de l'image */
+  
+      }
+  
+      /* Nouveau style pour l'élément tooltip */
+      .tooltip {
+        position: absolute;
+        display: none;
+        padding: 5px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        font-size: 12px;
+        white-space: nowrap;
+        pointer-events: none;
+        /* Empêche l'élément de capturer les événements de souris */
+      }
+  
+      .audio-number {
+    position:sticky;
+    color: rgb(15, 11, 11); /* Couleur du texte */
+    font-size: 12px; /* Taille de la police */
+    font-family: Arial, sans-serif; /* Police de caractères */
+  }
