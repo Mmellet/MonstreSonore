@@ -5,7 +5,11 @@
     <title>Les transcripteurs par thèmes</title>
     <link href="./parcours3.css" rel="stylesheet">
 
+
+
 </head>
+
+
 
 <body>
     <p class="selecteur">
@@ -37,7 +41,7 @@
         var audioFiles = {};
 
         function chargerFichiersAudio() {
-    return fetch('https://mmellet.github.io/MonstreSonore/thematiques.csv')
+    return fetch('https://mmellet.github.io/MonstreSonore/thematiques_transcripteurs.csv')
         .then(response => response.text())
         .then(data => {
             var lignes = data.split('\n');
