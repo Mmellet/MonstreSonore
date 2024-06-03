@@ -103,7 +103,7 @@
       /* Style pour l'élément audio */
       #audioPlayer {
           display:none;
-          width:60em;
+          width:50em;
       }
 
       .cadre-central {
