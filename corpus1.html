@@ -123,7 +123,6 @@ sortedRanges.forEach(range => {
       console.error('Erreur lors de la récupération des identifiants:', error);
     }
   }
-
   function afficherFichierAudio(identifiant) {
     const identifiantPadded = identifiant.toString().padStart(4, '0');
     const audioURL = `http://ia600306.s3dns.us.archive.org/shar-1244-2/SHAR${identifiantPadded}.mp3`;
@@ -131,17 +130,29 @@ sortedRanges.forEach(range => {
     audioPlayer.src = audioURL;
 
     const identifiantSelectionne = document.getElementById('identifiantSelectionne');
-    identifiantSelectionne.textContent = `Numéro de la dictée sélectionnée : ${identifiant}`; // Mettre à jour l'identifiant affiché
+    identifiantSelectionne.textContent = `Identifiant sélectionné : ${identifiant}`; // Mettre à jour l'identifiant affiché
 
     // Masquer ou afficher l'élément audioPlayer en fonction de la présence d'un identifiant
     if (identifiant) {
         audioPlayer.style.display = 'block';
-        audioPlayer.play(); // Lancer la lecture automatiquement
+
+        // Jouer l'audio seulement après un clic utilisateur pour Chrome
+        audioPlayer.play().then(() => {
+            console.log('Lecture commencée avec succès');
+        }).catch(error => {
+            console.error('Erreur lors de la lecture audio:', error);
+            // Essayer de jouer l'audio après une interaction utilisateur
+            audioPlayer.addEventListener('click', () => {
+                audioPlayer.play();
+            }, { once: true });
+        });
+
         afficherThemes(identifiant); // Appeler la fonction pour afficher les thématiques
     } else {
         audioPlayer.style.display = 'none';
     }
 }
+
 
 
   var themes = {};
