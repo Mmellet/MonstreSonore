@@ -3,158 +3,8 @@
 
 <head>
     <title>Les <i>Transcripteurs</i>, corpus</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            position: relative;
-            height: 100vh;
-            width: 100%;
-            background-color: #F7F3E9;
-            font-family: Arial, Helvetica, sans-serif;
-            color: rgba(13, 2, 65, 0.801);
-        }
+    <link href="./corpus1.css" rel="stylesheet">
 
-        p {
-            font-family: 'Times New Roman', Times, serif;
-            color: rgba(13, 2, 65, 0.801);
-            font-size: 28px;
-            margin-bottom: -1.8px;
-        }
-
-        h1,
-        h2 {
-            color: rgba(13, 2, 65);
-            font-family: 'Times New Roman', Times, serif;
-            text-align: left;
-            font-size: 44px;
-            margin-left: 10%;
-        }
-
-        .container {
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .navigation {
-            display: block;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            width: 50%;
-            margin-left: 10%;
-        }
-
-        .range-column {
-            display: inline-flex;
-            flex-direction: column;
-            padding-left: 40px;
-        }
-
-        nav menuitem {
-            position: relative;
-            display: block;
-            padding-top: 10px;
-            cursor: pointer;
-        }
-
-        nav menuitem>menu {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 100%;
-            max-height: 50vh;
-            overflow-y: auto;
-            background-color: #FFF;
-            border: 1px solid rgba(13, 2, 65);
-            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            z-index: 1;
-        }
-
-        nav menuitem:hover>menu {
-            display: block;
-        }
-
-        nav a {
-            background: rgba(13, 2, 65);
-            color: #FFF;
-            display: block;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 3px;
-            text-decoration: none;
-        }
-
-        nav a:hover {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .identifiant {
-            background-color: white;
-            color: rgb(2, 3, 65);
-            display: block;
-            padding: 5px;
-            text-decoration: none;
-        }
-
-        .identifiant:hover {
-            background-color: rgba(13, 2, 65, 0.1);
-        }
-
-        /* Style pour l'élément audio */
-        #audioPlayer {
-            display:none;
-            width: 300%;
-            margin-left: -100%;
-        }
-
-        .cadre-central {
-            position: absolute;
-            top: 45%;
-            left: 70%;
-            transform: translate(-50%, -50%);
-            width: 50%;
-            height: 75%;
-            border: 2px solid black;
-            box-sizing: border-box;
-            background-color: #F7F3E9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-
-        /* Style pour l'aperçu d'image */
-        .image-preview {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .image-preview img {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: auto;
-        }
-
-        #themes {
-margin-left: 45%;
-margin-top: 8%;
-        }
-
-        #identifiantSelectionne {
-          font-size: 22px;
-        }
-    </style>
 </head>
 
 <body>
@@ -180,12 +30,26 @@ margin-top: 8%;
             <div class="image-preview" id="imagePreview">
                 <!-- L'aperçu de l'image sera ajouté ici par JavaScript -->
             </div>
+
+        <div id="themes">
+        </div>
             <div class="audio-wrapper" id="audioWrapper">
                 <audio id="audioPlayer" controls></audio>
             </div>
         </div>
-        <div id="themes"></div>
     </div>
+    <div class="watermark"><span>Le corpus des <i>transcripteurs</i></span><br><span>Le Monstre Sonore - cc by-sa 4.0
+      2024</span>
+
+  <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+</div>
+<div style="position: absolute; left: 32%;bottom: 8%;font-size: 15px;">
+  <span>Retrouvez les mots-clefs et leurs définitions au sein du <a
+          href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a> ainsi que dans le parcours <a href="https://www.lemonstresonore.com/parcours-decoute-2"><i>Les transcripteurs par thèmes</i></a></span>
+</div>
+<button class="reload-button" onclick="location.reload()">
+  <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
+</button>
 <script>
   var images = ["https://mmellet.github.io/MonstreSonore/media/images/manuscrit.png"];
   const csvURL = 'https://mmellet.github.io/MonstreSonore/id_transcripteurs.csv';
