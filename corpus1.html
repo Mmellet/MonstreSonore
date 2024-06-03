@@ -125,7 +125,7 @@ sortedRanges.forEach(range => {
   }
   function afficherFichierAudio(identifiant) {
     const identifiantPadded = identifiant.toString().padStart(4, '0');
-    const audioURL = `https://ia800309.us.archive.org/7/items/shar-1244-2/${identifiantPadded}.mp3`;
+    const audioURL = `http://ia600306.s3dns.us.archive.org/shar-1244-2/SHAR${identifiantPadded}.mp3`;
     const audioPlayer = document.getElementById('audioPlayer');
     audioPlayer.src = audioURL;
 
