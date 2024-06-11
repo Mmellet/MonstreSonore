@@ -31,13 +31,13 @@
   const ids = text.trim().split(';'); // Séparer les IDs par un point virgule
   const randomIndex = Math.floor(Math.random() * ids.length); // Choisir un index aléatoire dans le tableau des IDs
   const randomId = ids[randomIndex]; // Sélectionner l'ID correspondant à l'index
-  return `http://ia600306.s3dns.us.archive.org/shar-1244-2/${randomId}.mp3`; // Retourner l'URL complète
+  return `https://media.githubusercontent.com/media/Mmellet/MonstreSonore-corpus/main/transcripteurs/${randomId}.mp3`; // Retourner l'URL complète
 }
 
 
     async function getAudioFiles() {
       return new Promise((resolve, reject) => {
-        fetch('https://mmellet.github.io/MonstreSonore/media/dictees/transcripteurs/')
+        fetch('https://media.githubusercontent.com/media/Mmellet/MonstreSonore-corpus/main/transcripteurs/')
           .then(response => response.text())
           .then(text => {
             const parser = new DOMParser();
