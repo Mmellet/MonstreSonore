@@ -17,5 +17,5 @@ Les corpus :
 
 Les fichiers audio ont été répertoriés sur les plateformes suivantes : 
 
-- Repo Github [MonstreSonore-corpus](https://github.com/Mmellet/MonstreSonore-corpus)
+- Nakala [Les Transcripteurs](https://nakala.fr/10.34847/nkl.d85dy5vk)
 - Internet Archive [Les Transcripteurs](https://archive.org/details/shar-1244-2)
