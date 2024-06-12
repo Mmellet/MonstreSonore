@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Les Transcripteurs, corpus</title>
     <link href="./corpus1.css" rel="stylesheet">
-
 </head>
-
 <body>
     <div class="container">
         <h1>Corpus des Transcripteurs</h1>
@@ -25,197 +22,130 @@
         </div>
 
         <div class="cadre-central">
-
-        <div id="identifiantSelectionne"></div>
+            <div id="identifiantSelectionne"></div>
             <div class="image-preview" id="imagePreview">
                 <!-- L'aperçu de l'image sera ajouté ici par JavaScript -->
             </div>
 
-        <div id="themes">
-        </div>
+            <div id="themes"></div>
             <div class="audio-wrapper" id="audioWrapper">
                 <audio id="audioPlayer" controls></audio>
             </div>
         </div>
     </div>
-    <div class="watermark"><span>Le corpus des <i>transcripteurs</i></span><br><span>Le Monstre Sonore - cc by-sa 4.0
-      2024</span>
+    <div class="watermark"><span>Le corpus des <i>transcripteurs</i></span><br><span>Le Monstre Sonore - cc by-sa 4.0 2024</span>
+        <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+    </div>
+    <div style="position: absolute; left: 32%;bottom: 8%;font-size: 15px;">
+        <span>Retrouvez les mots-clefs et leurs définitions au sein du <a href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a> ainsi que dans le parcours <a href="https://www.lemonstresonore.com/parcours-decoute-2"><i>Les transcripteurs par thèmes</i></a></span>
+    </div>
+    <button class="reload-button" onclick="location.reload()">
+        <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
+    </button>
+    <script>
+        var csvURL = 'https://mmellet.github.io/MonstreSonore/corpus.csv';
+        var nakalaEmbedURL = 'https://api.nakala.fr/data/10.34847/nkl.d85dy5vk/';
+        async function fetchIdentifiants() {
+            try {
+                const response = await fetch(csvURL);
+                const data = await response.text();
+                const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
 
-  <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
-</div>
-<div style="position: absolute; left: 32%;bottom: 8%;font-size: 15px;">
-  <span>Retrouvez les mots-clefs et leurs définitions au sein du <a
-          href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a> ainsi que dans le parcours <a href="https://www.lemonstresonore.com/parcours-decoute-2"><i>Les transcripteurs par thèmes</i></a></span>
-</div>
-<button class="reload-button" onclick="location.reload()">
-  <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
-</button>
-<script>
-  var images = ["https://mmellet.github.io/MonstreSonore/media/images/manuscrit.png"];
-  const csvURL = 'https://mmellet.github.io/MonstreSonore/id_transcripteurs.csv';
+                const rangeMenu1 = document.querySelector('#rangeMenu1');
+                const rangeMenu2 = document.querySelector('#rangeMenu2');
+                const ranges = {};
 
-  async function fetchIdentifiants() {
-    try {
-      const response = await fetch(csvURL);
-      const data = await response.text();
-      const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
+                lines.forEach(line => {
+                    const [identifiant, nakalaIdentifiant] = line.split(',');
+                    if (identifiant.startsWith('SHAR')) {
+                        const rangeStart = Math.floor(parseInt(identifiant.substring(4)) / 100) * 100;
+                        const rangeEnd = rangeStart + 99;
+                        const rangeKey = `${rangeStart}-${rangeEnd}`;
 
-      const rangeMenu1 = document.querySelector('#rangeMenu1');
-      const rangeMenu2 = document.querySelector('#rangeMenu2');
-      const ranges = {};
+                        if (!ranges[rangeKey]) {
+                            ranges[rangeKey] = [];
+                        }
+                        ranges[rangeKey].push({ identifiant: identifiant.substring(4), nakalaIdentifiant });
+                    }
+                });
 
-      lines.forEach(line => {
-        if (line.startsWith('SHAR')) {
-          const identifiant = parseInt(line.substring(4));
-          const rangeStart = Math.floor(identifiant / 100) * 100;
-          const rangeEnd = rangeStart + 99;
-          const rangeKey = `${rangeStart}-${rangeEnd}`;
+                const sortedRanges = Object.keys(ranges).sort((a, b) => parseInt(a.split('-')[0]) - parseInt(b.split('-')[0]));
 
-          if (!ranges[rangeKey]) {
-            ranges[rangeKey] = [];
-          }
-          ranges[rangeKey].push(identifiant);
+                sortedRanges.forEach(range => {
+                    const menuitem = document.createElement('menuitem');
+                    const a = document.createElement('a');
+                    a.textContent = range;
+                    menuitem.appendChild(a);
+
+                    const submenu = document.createElement('menu');
+
+                    ranges[range].forEach(item => {
+                        const subMenuItem = document.createElement('menuitem');
+                        const subMenuItemLink = document.createElement('a');
+                        subMenuItemLink.className = "identifiant";
+                        subMenuItemLink.textContent = item.identifiant; // afficher sans SHAR
+                        subMenuItemLink.href = "#";
+                        subMenuItemLink.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            afficherFichierAudio(item.nakalaIdentifiant, item.identifiant);
+                            afficherApercuImage(item.nakalaIdentifiant);
+                        });
+                        subMenuItem.appendChild(subMenuItemLink);
+                        submenu.appendChild(subMenuItem);
+                    });
+
+                    menuitem.appendChild(submenu);
+
+                    if (parseInt(range.split('-')[0]) >= 700) {
+                        rangeMenu2.appendChild(menuitem);
+                    } else {
+                        rangeMenu1.appendChild(menuitem);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Erreur lors de la récupération des identifiants:', error);
+            }
         }
-      });
 
-      const sortedRanges = Object.keys(ranges).sort((a, b) => {
-  const startA = parseInt(a.split('-')[0]);
-  const startB = parseInt(b.split('-')[0]);
-  return startA - startB;
-});
-// Assigner les plages de manière alternée dans rangeMenu1 et rangeMenu2
-let toggle = true;
-sortedRanges.forEach(range => {
-    const menuitem = document.createElement('menuitem');
-    const a = document.createElement('a');
-    a.textContent = range;
-    menuitem.appendChild(a);
+        function afficherFichierAudio(nakalaIdentifiant, identifiant) {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = nakalaEmbedURL + nakalaIdentifiant;
 
-    const submenu = document.createElement('menu');
+            const identifiantSelectionne = document.getElementById('identifiantSelectionne');
+            // Afficher uniquement l'identifiant du fichier audio, sans le préfixe "SHAR"
+            identifiantSelectionne.textContent = `Identifiant sélectionné : ${identifiant}`;
 
-    ranges[range].forEach(identifiant => {
-        const subMenuItem = document.createElement('menuitem');
-        const subMenuItemLink = document.createElement('a');
-        subMenuItemLink.className = "identifiant";
-        subMenuItemLink.textContent = identifiant;
-        subMenuItemLink.href = "#";
-        subMenuItemLink.addEventListener('click', function (e) {
-            e.preventDefault();
-            afficherFichierAudio(identifiant);
-            afficherApercuImage(identifiant);
-        });
-        subMenuItem.appendChild(subMenuItemLink);
-        submenu.appendChild(subMenuItem);
-    });
+            if (nakalaIdentifiant) {
+                audioPlayer.style.display = 'block';
 
-    menuitem.appendChild(submenu);
-
-    // Vérifier si la plage est supérieure ou égale à 700 pour déterminer dans quelle colonne l'ajouter
-    if (parseInt(range.split('-')[0]) >= 700) {
-        rangeMenu2.appendChild(menuitem);
-    } else {
-        rangeMenu1.appendChild(menuitem);
-    }
-});
-
-
-    } catch (error) {
-      console.error('Erreur lors de la récupération des identifiants:', error);
-    }
-  }
-  function afficherFichierAudio(identifiant) {
-    const identifiantPadded = identifiant.toString().padStart(4, '0');
-    const audioURL = `https://media.githubusercontent.com/media/Mmellet/MonstreSonore-corpus/main/transcripteurs/SHAR${identifiantPadded}.mp3`;
-    const audioPlayer = document.getElementById('audioPlayer');
-    audioPlayer.src = audioURL;
-
-    const identifiantSelectionne = document.getElementById('identifiantSelectionne');
-    identifiantSelectionne.textContent = `Identifiant sélectionné : ${identifiant}`; // Mettre à jour l'identifiant affiché
-
-    // Masquer ou afficher l'élément audioPlayer en fonction de la présence d'un identifiant
-    if (identifiant) {
-        audioPlayer.style.display = 'block';
-
-        // Jouer l'audio seulement après un clic utilisateur pour Chrome
-        audioPlayer.play().then(() => {
-            console.log('Lecture commencée avec succès');
-        }).catch(error => {
-            console.error('Erreur lors de la lecture audio:', error);
-            // Essayer de jouer l'audio après une interaction utilisateur
-            audioPlayer.addEventListener('click', () => {
-                audioPlayer.play();
-            }, { once: true });
-        });
-
-        afficherThemes(identifiant); // Appeler la fonction pour afficher les thématiques
-    } else {
-        audioPlayer.style.display = 'none';
-    }
-}
-
-
-
-  var themes = {};
-
-  async function fetchThemes() {
-    try {
-      const response = await fetch('https://mmellet.github.io/MonstreSonore-corpus/thematiques_transcripteurs.csv');
-      const data = await response.text();
-      const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
-
-      lines.forEach(line => {
-        const [theme, identifiant] = line.split(',');
-        if (!themes[identifiant]) {
-          themes[identifiant] = [];
+                audioPlayer.play().then(() => {
+                    console.log('Lecture commencée avec succès');
+                }).catch(error => {
+                    console.error('Erreur lors de la lecture audio:', error);
+                    audioPlayer.addEventListener('click', () => {
+                        audioPlayer.play();
+                    }, { once: true });
+                });
+            } else {
+                audioPlayer.style.display = 'none';
+            }
         }
-        themes[identifiant].push(theme);
-      });
-    } catch (error) {
-      console.error('Erreur lors du chargement des thématiques:', error);
-    }
-  }
 
-  // Appel de la fonction pour charger les thématiques
-  fetchThemes();
+        function afficherThemes(identifiant) {
+            // Votre fonction pour afficher les thématiques ici...
+        }
 
- function afficherThemes(identifiant) {
-    const themesIdentifiant = themes[`SHAR${identifiant.toString().padStart(4, '0')}`];
-    const themesDiv = document.getElementById('themes');
+        function afficherApercuImage(identifiant) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
 
-    // Vérifier si le conteneur des thématiques est présent
-    if (!themesDiv) {
-        console.error('Le conteneur des thématiques est introuvable.');
-        return;
-    }
+            const image = document.createElement('img');
+            image.src = 'https://mmellet.github.io/MonstreSonore/media/images/manuscrit.png';
+            imagePreview.appendChild(image);
+        }
 
-    // Vider le conteneur des thématiques avant d'ajouter les nouvelles
-    themesDiv.innerHTML = '';
-
-    // Vérifier si themesIdentifiant est défini
-    if (themesIdentifiant) {
-        // Concaténer les thématiques avec des virgules
-        const themesText = 'Thématique(s) de la dictée : ' + themesIdentifiant.join(', ');
-        const p = document.createElement('p');
-        p.textContent = themesText;
-        themesDiv.appendChild(p);
-    }
-}
-
-
-  function afficherApercuImage(identifiant) {
-    const imagePreview = document.getElementById('imagePreview');
-    imagePreview.innerHTML = '';
-
-    const image = document.createElement('img');
-    image.src = images[0];
-    imagePreview.appendChild(image);
-  }
-
-  fetchIdentifiants();
-</script>
-
-    
-  </div>
+        fetchIdentifiants();
+    </script>
 </body>
-
 </html>
