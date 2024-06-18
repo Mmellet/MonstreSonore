@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Les Transcripteurs, corpus</title>
+    <link href="./corpus.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Corpus des Transcripteurs</h1>
+        <p style="margin-left: 7%;">Sélectionnez une dictée pour l'écoute :</p>
+        <div class="navigation">
+            <div class="range-column">
+                <nav>
+                    <menu id="rangeMenu1"></menu>
+                </nav>
+            </div>
+            <div class="range-column">
+                <nav>
+                    <menu id="rangeMenu2"></menu>
+                </nav>
+            </div>
+        </div>
+
+        <div class="cadre-central">
+            <div id="identifiantSelectionne"></div>
+            <div class="image-preview" id="imagePreview">
+                <!-- L'aperçu de l'image sera ajouté ici par JavaScript -->
+            </div>
+
+            <div id="themes"></div>
+            <div class="audio-wrapper" id="audioWrapper">
+                <audio id="audioPlayer" controls></audio>
+            </div>
+        </div>
+    </div>
+    <div class="watermark"><span>Le corpus des <i>transcripteurs</i></span><br><span>Le Monstre Sonore - cc by-sa 4.0 2024</span>
+        <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+    </div>
+    <div style="position: absolute; left: 32%;bottom: 8%;font-size: 15px;">
+        <span>Retrouvez les mots-clefs et leurs définitions au sein du <a href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a> ainsi que dans le parcours <a href="https://www.lemonstresonore.com/parcours-decoute-2"><i>Les transcripteurs par thèmes</i></a></span>
+    </div>
+    <button class="reload-button" onclick="location.reload()">
+        <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
+    </button>
+    <script>
+        var csvURL = 'https://mmellet.github.io/MonstreSonore/corpus_transcripteurs.csv';
+        var nakalaEmbedURL = 'https://api.nakala.fr/data/10.34847/nkl.d85dy5vk/';
+        async function fetchIdentifiants() {
+            try {
+                const response = await fetch(csvURL);
+                const data = await response.text();
+                const lines = data.split('\n').map(line => line.trim()).filter(line => line !== '');
+
+                const rangeMenu1 = document.querySelector('#rangeMenu1');
+                const rangeMenu2 = document.querySelector('#rangeMenu2');
+                const ranges = {};
+
+                lines.forEach(line => {
+                    const [identifiant, nakalaIdentifiant] = line.split(',');
+                    if (identifiant.startsWith('SHAR')) {
+                        const rangeStart = Math.floor(parseInt(identifiant.substring(4)) / 100) * 100;
+                        const rangeEnd = rangeStart + 99;
+                        const rangeKey = `${rangeStart}-${rangeEnd}`;
+
+                        if (!ranges[rangeKey]) {
+                            ranges[rangeKey] = [];
+                        }
+                        ranges[rangeKey].push({ identifiant: identifiant.substring(4), nakalaIdentifiant });
+                    }
+                });
+
+                const sortedRanges = Object.keys(ranges).sort((a, b) => parseInt(a.split('-')[0]) - parseInt(b.split('-')[0]));
+
+                sortedRanges.forEach(range => {
+                    const menuitem = document.createElement('menuitem');
+                    const a = document.createElement('a');
+                    a.textContent = range;
+                    menuitem.appendChild(a);
+
+                    const submenu = document.createElement('menu');
+
+                    ranges[range].forEach(item => {
+                        const subMenuItem = document.createElement('menuitem');
+                        const subMenuItemLink = document.createElement('a');
+                        subMenuItemLink.className = "identifiant";
+                        subMenuItemLink.textContent = item.identifiant; // afficher sans SHAR
+                        subMenuItemLink.href = "#";
+                        subMenuItemLink.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            afficherFichierAudio(item.nakalaIdentifiant, item.identifiant);
+                            afficherApercuImage(item.nakalaIdentifiant);
+                        });
+                        subMenuItem.appendChild(subMenuItemLink);
+                        submenu.appendChild(subMenuItem);
+                    });
+
+                    menuitem.appendChild(submenu);
+
+                    if (parseInt(range.split('-')[0]) >= 700) {
+                        rangeMenu2.appendChild(menuitem);
+                    } else {
+                        rangeMenu1.appendChild(menuitem);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Erreur lors de la récupération des identifiants:', error);
+            }
+        }
+
+        function afficherFichierAudio(nakalaIdentifiant, identifiant) {
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = nakalaEmbedURL + nakalaIdentifiant;
+
+            const identifiantSelectionne = document.getElementById('identifiantSelectionne');
+            // Afficher uniquement l'identifiant du fichier audio, sans le préfixe "SHAR"
+            identifiantSelectionne.textContent = `Identifiant sélectionné : ${identifiant}`;
+
+            if (nakalaIdentifiant) {
+                audioPlayer.style.display = 'block';
+
+                audioPlayer.play().then(() => {
+                    console.log('Lecture commencée avec succès');
+                }).catch(error => {
+                    console.error('Erreur lors de la lecture audio:', error);
+                    audioPlayer.addEventListener('click', () => {
+                        audioPlayer.play();
+                    }, { once: true });
+                });
+            } else {
+                audioPlayer.style.display = 'none';
+            }
+        }
+
+        function afficherThemes(identifiant) {
+            // Votre fonction pour afficher les thématiques ici...
+        }
+
+        function afficherApercuImage(identifiant) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
+
+            const image = document.createElement('img');
+            image.src = 'https://mmellet.github.io/MonstreSonore/media/images/manuscrit.png';
+            imagePreview.appendChild(image);
+        }
+
+        fetchIdentifiants();
+    </script>
+</body>
+</html>

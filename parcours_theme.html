@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Les transcripteurs par thèmes</title>
+    <link href="./parcours_theme.css" rel="stylesheet">
+
+
+
+</head>
+
+
+
+<body>
+    <p class="selecteur">
+        <label for="select">Sélectionnez un mot-clef :</label>
+        <select id="select" onchange="afficherContenu()"
+            style="font-family: 'Times New Roman', Times, serif;font-size: 18px;">
+            <option value="" style="font-family: 'Times New Roman', Times, serif;font-size: 36px;"></option>
+        </select>
+    </p>
+    <div id="contenu"></div>
+    <div class="watermark"><span>Les <i>transcripteurs</i> par thèmes</span><br><span>Le Monstre Sonore - cc by-sa 4.0
+            2024</span>
+
+        <a href="https://github.com/Mmellet/MonstreSonore"><img src="./media/images/logo_github.png" alt="GitHub"></a>
+    </div>
+    <div style="position: absolute; left: 42%;bottom: 8%;font-size: 15px;">
+        <span>Retrouvez les mots-clefs et leurs définitions au sein du <a
+                href="https://www.lemonstresonore.com/glossaireimmersif">Glossaire immersif</a></span>
+    </div>
+    <button class="reload-button" onclick="location.reload()">
+        <img src="./media/images/fleche.png" style="width: 100%; height: auto;" />
+    </button>
+
+    <script>
+        var images = [
+            "./media/images/manuscrit.png"
+        ];
+
+        var audioFiles = {};
+
+        function chargerFichiersAudio() {
+            return fetch('https://mmellet.github.io/MonstreSonore/thematiques_transcripteurs.csv')
+                .then(response => response.text())
+                .then(data => {
+                    var lignes = data.split('\n');
+                    var select = document.getElementById("select");
+
+                    lignes.forEach(ligne => {
+                        var elements = ligne.split(',');
+                        var motClef = elements[0];
+
+                        var option = document.createElement("option");
+                        option.value = motClef;
+                        option.textContent = motClef;
+                        select.appendChild(option);
+
+                        var fichiersAudio = elements.slice(1);
+                        fichiersAudio = fichiersAudio.map(audio =>
+                            "https://media.githubusercontent.com/media/Mmellet/MonstreSonore-corpus/main/transcripteurs/" + audio.trim() + ".mp3"
+                        );
+
+                        audioFiles[motClef] = fichiersAudio;
+                    });
+                });
+        }
+
+        window.onload = function () {
+            chargerFichiersAudio().then(() => {
+                var select = document.getElementById("select");
+                select.addEventListener("change", afficherContenu);
+            });
+        };
+
+        function getRandomFragment(imageUrl) {
+            var fragmentWidth = 50;
+            var fragmentHeight = 50;
+            var x = Math.floor(Math.random() * (300 - fragmentWidth));
+            var y = Math.floor(Math.random() * (300 - fragmentHeight));
+            return "url(" + imageUrl + ") " + (-x) + "px " + (-y) + "px";
+        }
+
+        function dessinerLignes() {
+    var cadreCentral = document.querySelector(".cadre-central");
+    var hexagones = cadreCentral.querySelectorAll(".hexagon");
+
+    hexagones.forEach(hexagone => {
+        var x1 = parseInt(hexagone.style.left) + 40; // Point de départ horizontal au centre de l'hexagone
+        var y1 = parseInt(hexagone.style.top) + 40; // Point de départ vertical au centre de l'hexagone
+
+        hexagones.forEach(autreHexagone => {
+            if (hexagone !== autreHexagone) {
+                var x2 = parseInt(autreHexagone.style.left) + 40; // Point d'arrivée horizontal au centre de l'autre hexagone
+                var y2 = parseInt(autreHexagone.style.top) + 40; // Point d'arrivée vertical au centre de l'autre hexagone
+
+                var distanceX = x2 - x1;
+                var distanceY = y2 - y1;
+                var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+                // Ajouter une courbe avec une opacité variable
+                var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute("width", "1000%");
+                svg.setAttribute("height", "1000%");
+                svg.style.position = "absolute";
+                svg.style.top = 0;
+                svg.style.left = 0;
+                svg.style.pointerEvents = "none"; // Permet de cliquer à travers l'élément SVG
+
+                var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+                // Générer des valeurs d'opacité et de longueur de segments aléatoires pour chaque segment de courbe
+                var opacites = [];
+                var longueursSegments = [];
+                var step = 1 / 2; // Variation de l'opacité et de la longueur en fonction des segments
+                var currentOpacity = Math.random(); // Opacité initiale aléatoire
+                var currentLength = Math.random() * (distance / 100); // Longueur initiale aléatoire
+                for (let i = 0; i < 10; i++) {
+                    opacites.push(currentOpacity);
+                    longueursSegments.push(currentLength);
+
+                    currentOpacity += (Math.random() - 100) * step; // Variation aléatoire pour la prochaine opacité
+                    currentOpacity = Math.min(1, Math.max(0, currentOpacity)); // Limiter l'opacité entre 0 et 1
+
+                    currentLength += (Math.random() - 0.5) * (distance / 5) * step; // Variation aléatoire pour la prochaine longueur
+                    currentLength = Math.min(distance / 10, Math.max(0, currentLength)); // Limiter la longueur entre 0 et la longueur totale
+                }
+
+                path.setAttribute("d", `M${x1},${y1} Q${x1 + distanceX / 2},${y1 + distanceY / 2 + Math.random() * 200} ${x2},${y2}`);
+                path.setAttribute("stroke", "rgba(33, 5, 85, 0.5)"); 
+                path.setAttribute("fill", "transparent");
+
+                // Appliquer les opacités et longueurs de segments au trait
+                path.style.strokeDasharray = longueursSegments.join(" "); // Définir la longueur de chaque segment
+                path.style.strokeDashoffset = Math.random() * (distance / 10); // Décalage aléatoire pour un début de ligne varié
+                path.style.opacity = opacites.join(","); // Utiliser les valeurs d'opacité générées
+
+                svg.appendChild(path);
+                cadreCentral.appendChild(svg);
+            }
+        });
+    });
+}
+
+
+        function afficherFormes(fichiersAudio) {
+    var contenu = document.getElementById("contenu");
+    var cadreCentral = document.createElement("div");
+    cadreCentral.className = "cadre-central";
+    contenu.appendChild(cadreCentral);
+
+    var motClefElement = document.createElement("h1");
+    motClefElement.textContent = select.value; // Sélectionner le mot-clé actuel
+    motClefElement.className = "mot-clef"; // Ajouter la classe pour l'animation
+    cadreCentral.appendChild(motClefElement);
+
+    // Forcer le recalcul du style pour que la transition s'applique
+    motClefElement.offsetHeight;
+
+    var hexagoneSize = 80;
+    var padding = 20;
+    var minDistance = 40; // Distance minimale entre les hexagones
+
+    var regionCentrale = {
+        top: padding,
+        left: padding,
+        width: cadreCentral.clientWidth - 2 * padding,
+        height: cadreCentral.clientHeight - 2 * padding
+    };
+
+    var positionsUtilisees = [];
+
+    // Faire apparaître le mot-clef progressivement
+    motClefElement.style.opacity = 1;
+
+    fichiersAudio.forEach(audio => {
+        var left, top;
+        var positionValide = false;
+
+        while (!positionValide) {
+            left = Math.random() * regionCentrale.width + regionCentrale.left;
+            top = Math.random() * regionCentrale.height + regionCentrale.top;
+
+            // Vérifier que la position n'est pas sur le mot-clef
+            if (Math.abs(left - cadreCentral.clientWidth / 2) < hexagoneSize &&
+                Math.abs(top - cadreCentral.clientHeight / 2) < hexagoneSize) {
+                continue;
+            }
+
+            positionValide = true;
+
+            // Vérifier qu'il n'y a pas de collision avec les positions existantes
+            for (var i = 0; i < positionsUtilisees.length; i++) {
+                var positionExistante = positionsUtilisees[i];
+                var distanceX = Math.abs(left - positionExistante.left);
+                var distanceY = Math.abs(top - positionExistante.top);
+                var distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+                if (distance < hexagoneSize + minDistance) {
+                    positionValide = false;
+                    break;
+                }
+            }
+
+            if (left < padding || left + hexagoneSize > regionCentrale.width - padding ||
+                top < padding || top + hexagoneSize > regionCentrale.height - padding) {
+                positionValide = false;
+            }
+        }
+
+        positionsUtilisees.push({
+            left: left,
+            top: top
+        });
+
+        // Créer et ajouter l'hexagone à la cadre central
+        var hexagone = document.createElement("div");
+        hexagone.className = "hexagon";
+        hexagone.style.top = top + "px";
+        hexagone.style.left = left + "px";
+        var randomImage = images[Math.floor(Math.random() * images.length)];
+        hexagone.style.background = getRandomFragment(randomImage);
+
+        hexagone.addEventListener("click", function () {
+            var audioElement = document.getElementById("audio-" + audio);
+            if (audioElement.paused) {
+                audioElement.play();
+                hexagone.classList.add("playing");
+            } else {
+                audioElement.pause();
+                hexagone.classList.remove("playing");
+            }
+        });
+
+        cadreCentral.appendChild(hexagone);
+
+        // Afficher le numéro du fichier audio à côté de l'hexagone
+        var numero = audio.split('/').pop().replace('SHAR', '').replace('.mp3', '');
+        var numeroElement = document.createElement("span");
+        numeroElement.textContent = numero;
+        numeroElement.style.position = "absolute";
+        numeroElement.style.left = left + hexagoneSize + 10 + "px";
+        numeroElement.style.top = top + hexagoneSize - 10 + "px";
+        numeroElement.style.fontSize = "12px";
+        cadreCentral.appendChild(numeroElement);
+
+        // Créer et ajouter l'élément audio correspondant
+        var audioElement = document.createElement("audio");
+        audioElement.id = "audio-" + audio;
+        audioElement.src = audio;
+        cadreCentral.appendChild(audioElement);
+    });
+
+    // Dessiner les lignes après avoir affiché les hexagones
+    dessinerLignes();
+}
+
+        function afficherContenu() {
+            var select = document.getElementById("select");
+            var contenu = document.getElementById("contenu");
+
+            contenu.innerHTML = "";
+
+            if (select.value in audioFiles) {
+                var introduction = document.createElement("p");
+                introduction.textContent = "Parcours d'écoute pour « " + select.value + " »";
+                contenu.appendChild(introduction);
+
+                var listeIdentifiants = document.createElement("p");
+                var identifiants = audioFiles[select.value].map(audio => audio.split('/').pop().split('.')[0].replace(
+                    'SHAR', '')).join(", ");
+                listeIdentifiants.textContent = "Identifiants des fichiers audio : " + identifiants;
+                listeIdentifiants.style.fontSize = "18px";
+                contenu.appendChild(listeIdentifiants);
+
+                afficherFormes(audioFiles[select.value]);
+            }
+        }
+    </script>
+</body>
+
+</html>
