@@ -41,7 +41,7 @@
         var audioFiles = {};
 
         function chargerFichiersAudio() {
-            return fetch('https://mmellet.github.io/MonstreSonore-corpus/thematiques_transcripteurs.csv')
+            return fetch('https://mmellet.github.io/MonstreSonore/thematiques_transcripteurs.csv')
                 .then(response => response.text())
                 .then(data => {
                     var lignes = data.split('\n');
