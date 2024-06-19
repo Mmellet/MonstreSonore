@@ -16,5 +16,5 @@ Les corpus :
 
 Les fichiers audio ont été répertoriés sur les plateformes suivantes : 
 
-- Nakala [Les Transcripteurs](https://nakala.fr/10.34847/nkl.d85dy5vk) et [Les Essais](https://nakala.fr/10.34847/nkl.bb4dx7r8)
+- Nakala [Les Transcripteurs](https://nakala.fr/10.34847/nkl.d85dy5vk) et [Les Essais](https://nakala.fr/10.34847/nkl.10ecaq4t)
 - Internet Archive [Les Transcripteurs](https://archive.org/details/shar-1244-2)
